@@ -1,0 +1,1 @@
+nasm -felf64 _Detector.asm && gcc _Detector.o Main.c -o Detector -pthread
