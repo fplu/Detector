@@ -1,20 +1,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <sys/mman.h>
+#include <unistd.h>
+#include <pthread.h>
 
-
-int mprotect(void* addr, size_t len, int prot);
-int pthread_create(pthread_t* thread, pthread_attr_t* attr, void* (*start_routine) (void*), void* arg);
+#define handle_error(msg) \
+           do { perror(msg); exit(EXIT_FAILURE); } while (0)
 
 extern int _ModifiedThread();
 extern void _ThreadWhichModify();
 #define ModifiedThread _ModifiedThread
 #define ThreadWhichModify _ThreadWhichModify
-
-#define	PROT_READ	0x04	/* pages can be read */
-#define	PROT_WRITE	0x02	/* pages can be written */
-#define	PROT_EXEC	0x01	/* pages can be executed */
-#define PAGE_SIZE 	4096
 
 #if __x86_64__
 typedef unsigned long long uintptr;
@@ -22,36 +19,29 @@ typedef unsigned long long uintptr;
 typedef unsigned long uintptr;
 #endif
 
-int main() {
-	pthread_t pthread;
+int main(int argc, char** argv) {
+    pthread_t pthread;
+    long page_alignment;
+    long pagesize = sysconf(_SC_PAGE_SIZE);
+    if(pagesize == -1){
+        handle_error("sysconf");
+    }
 
-	//Change the page right to allow both execution and writing.
-	if(mprotect((void*)(((uintptr) ModifiedThread)&(~0XFFF)), PAGE_SIZE+100, PROT_READ | PROT_WRITE | PROT_EXEC) == -1) {
-		return -1;
-	}
+    page_alignment = ~(pagesize-1);
 
+    // Change the page right to allow both execution and writing.
+    // Just hope that ModifiedThread function is written in 1 page of memory only.
+    if(mprotect( (void*) ((uintptr)(ModifiedThread) & page_alignment), pagesize, PROT_READ | PROT_WRITE | PROT_EXEC) == -1) {
+        handle_error("mprotect");
+    }
 
-	// Create the modifying thread.
-	if(pthread_create(&pthread, NULL, (void*(*)(void *))ThreadWhichModify, NULL)) {
-		return -1;
-	}
+    // Create the modifying thread.
+    if(pthread_create(&pthread, NULL, (void*(*)(void *))ThreadWhichModify, NULL)) {
+        handle_error("pthread_create");
+    }
+    
+    //Execute the function that is modified and display its result.
+    printf("%d\n", ModifiedThread());
 
-	
-	//Execute the function that is modified and display its result.
-	printf("%d\n", ModifiedThread());
-
-	return 0;
+    return 0;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
