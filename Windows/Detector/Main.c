@@ -24,7 +24,7 @@ int main(int argc, char** argv) {
 	GetSystemInfo(&si);
 
 	//Change the page right to allow both execution and writing.
-	if (VirtualProtect(ModifiedThread, si.dwPageSize, PAGE_EXECUTE_READWRITE, &oldProtect) == 0) {
+	if (VirtualProtect(ModifiedThread, si.dwPageSize - 0xF, PAGE_EXECUTE_READWRITE, &oldProtect) == 0) {
 		return EXIT_FAILURE;
 	}
 
@@ -39,7 +39,7 @@ int main(int argc, char** argv) {
 	printf("%d\n",ModifiedThread());
 
 	//Restore the right of the page.
-	VirtualProtect(ModifiedThread, si.dwPageSize, oldProtect, &oldProtect);
+	VirtualProtect(ModifiedThread, si.dwPageSize - 0xF, oldProtect, &oldProtect);
 	WaitForSingleObject(ModifiedThread, INFINITE);
 
 	return EXIT_SUCCESS;
