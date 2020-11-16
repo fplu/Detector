@@ -11,7 +11,6 @@ extern void _ThreadWhichModify();
 
 #include <Windows.h>
 #include <stdio.h>
-#define NB_TEST 50
 BOOLEAN sync = FALSE;
 
 
