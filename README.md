@@ -70,5 +70,15 @@ In order for this program to also detect VM you should modify the file "./Detect
 ## For Linux
 
 A sample to detect VM on Linux guest, DBI and Debuggers is given in the Linux folder. To compile it you just need to run 'RUNME64.sh' or 'RUNME32.sh' depending on your architecture (x64 or x86).
+Also make sure that you have 'nasm' and 'gcc-multilib' installed :
+```
+sudo apt update
+sudo apt-get install gcc-multilib g++-multilib
+sudo apt-get install nasm
+```
+
+## WARNING
+
+Do not forget to have at least 2 CPU cores on your computer and VM.
 
 
