@@ -6,7 +6,7 @@ GLOBAL _ThreadWhichModify
 section .text ; makes this executable
 	
 	_ThreadWhichModify:
-		mov byte[rel Sync], 1				; Synchronize the thread, but to early in order to exploit the FIFO property of the processor cache.
+		mov byte[rel Sync], 1				; Synchronize the thread, but too early in order to exploit the FIFO property of the processor cache.
 		mov byte[rel codeToModify + 1], 1	; Transform 'mov eax, 0' into 'mov eax, 1'.
 		ret
 

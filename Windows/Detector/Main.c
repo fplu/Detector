@@ -11,33 +11,35 @@ extern void _ThreadWhichModify();
 
 #include <Windows.h>
 #include <stdio.h>
-
 BOOLEAN sync = FALSE;
 
 
 
+int main(int argc, char** argv) {
 
-int main() {
 	HANDLE hThread;
 	DWORD oldProtect;
+	SYSTEM_INFO si;
+	GetSystemInfo(&si);
 
 	//Change the page right to allow both execution and writing.
-	if (VirtualProtect(ModifiedThread, 100, PAGE_EXECUTE_READWRITE, &oldProtect) == 0) {
-		return -1;
+	if (VirtualProtect(ModifiedThread, si.dwPageSize - 0xF, PAGE_EXECUTE_READWRITE, &oldProtect) == 0) {
+		return EXIT_FAILURE;
 	}
 
 	//Create a new thread to which will modify the code to execute.
 	hThread = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)ThreadWhichModify, NULL, 0, NULL);
 	if (hThread == NULL) {
-		return -1;
+		return EXIT_FAILURE;
 	}
 
-	
+
 	//Execute the function that is modified and display its result.
-	printf("%d\n", ModifiedThread());
+	printf("%d\n",ModifiedThread());
 
 	//Restore the right of the page.
-	VirtualProtect(ModifiedThread, 100, oldProtect, &oldProtect);
+	VirtualProtect(ModifiedThread, si.dwPageSize - 0xF, oldProtect, &oldProtect);
+	WaitForSingleObject(ModifiedThread, INFINITE);
 
-	return 0;
+	return EXIT_SUCCESS;
 }
