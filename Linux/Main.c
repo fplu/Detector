@@ -28,7 +28,6 @@ int main(int argc, char** argv) {
     }
 
     page_alignment = ~(pagesize-1);
-    printf("pagesize : %ld\n", pagesize);
 
     // Change the page right to allow both execution and writing.
     if(mprotect( (void*) ((uintptr)(ModifiedThread) & page_alignment), pagesize, PROT_READ | PROT_WRITE | PROT_EXEC) == -1) {
