@@ -3,8 +3,9 @@ GLOBAL _ThreadWhichModify
 
 
 
-section .text ; makes this executable
-	
+section .text 	; makes this executable
+align 4096		; aligns on page size for both x86 and x64 architectures, ensures that _ModifiedThread and codeToModify are on the same page
+
 	_ThreadWhichModify:
 		mov byte[rel Sync], 1				; Synchronize the thread, but too early in order to exploit the FIFO property of the processor cache.
 		mov byte[rel codeToModify + 1], 1	; Transform 'mov eax, 0' into 'mov eax, 1'.
